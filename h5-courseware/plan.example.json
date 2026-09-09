@@ -1,0 +1,206 @@
+{
+  "brand": "Alchemy",
+  "title": "WorkBuddy AI 工作系统 · 5 天实战营",
+  "theme_colors": ["#0071e3", "#5e5ce6", "#d63384", "#2da44e", "#d97706"],
+  "chapters": [
+    {
+      "title": "课程总览",
+      "nav_label": "总览",
+      "cover": {
+        "eyebrow": "Alchemy · AI TRAINING SERIES",
+        "title": "AI 工作系统",
+        "title_small": "WorkBuddy",
+        "title_big": "5 天实战营",
+        "subtitle": "不是学工具，而是直接做出你的 AI 工作流"
+      },
+      "pages": [
+        {
+          "type": "promise",
+          "eyebrow": "课程承诺",
+          "lead": "5 天带你从",
+          "from": "会用 AI",
+          "to": "搭建自己的 AI 分身 · Skill 系统 · 知识库 · 专家团队"
+        },
+        {
+          "type": "cards",
+          "eyebrow": "学完直接带走",
+          "title": "4 个可复用的 AI 资产",
+          "cards": [
+            {"title": "AI 超级分身", "desc": "一个懂你的 AI。理解你的职业背景、工作习惯、表达偏好，像靠谱任务分配者。"},
+            {"title": "内容自动生产工作流", "desc": "把调研、写作、配图、排版封装成一条流水线，一键产出公众号文章、PPT、报告。"},
+            {"title": "自动更新的知识库", "desc": "实时抓取、清洗、入库、推送。AI 替你读新闻、读书、整理资料，自动汇总。"},
+            {"title": "Skill 与专家协作方法", "desc": "把你的经验封装成 Skill，调用专家团完成复杂任务。从单兵到 AI 团队。"}
+          ],
+          "columns": 2
+        },
+        {
+          "type": "rows",
+          "eyebrow": "课程大纲",
+          "title": "5 天速览",
+          "subtitle": "每天 90 分钟直播 + 30 分钟实操 + 1 个打卡作业",
+          "rows": [
+            {"pill": "DAY 1", "date": "第 1 天", "theme": "AI 超级分身", "output": "SOUL / IDENTITY / USER 三层身份配置"},
+            {"pill": "DAY 2", "date": "第 2 天", "theme": "Skill 系统全链路", "output": "3 个高频 Skill + 1 条流水线"},
+            {"pill": "DAY 3", "date": "第 3 天", "theme": "信息抓取沉淀知识库", "output": "自动更新的个人知识库"},
+            {"pill": "DAY 4", "date": "第 4 天", "theme": "Skill 开发：把经验变资产", "output": "自研 Skill + 团队共享发布"},
+            {"pill": "DAY 5", "date": "第 5 天", "theme": "专家调用 + 专家团协作", "output": "跨领域复杂项目交付"}
+          ]
+        },
+        {
+          "type": "flow",
+          "eyebrow": "课程主线",
+          "title": "5 天主线逻辑",
+          "subtitle": "从会用 AI 到组建 AI 团队的递进路径",
+          "nodes": [
+            {"label": "DAY 1", "keyword": "身份", "desc": "AI 怎么懂我？三层身份配置"},
+            {"label": "DAY 2", "keyword": "技能", "desc": "AI 能做什么？Skill 调用组合"},
+            {"label": "DAY 3", "keyword": "知识", "desc": "AI 怎么记得住？知识库自动沉淀"},
+            {"label": "DAY 4", "keyword": "创造", "desc": "我能封装什么？自研 Skill"},
+            {"label": "DAY 5", "keyword": "团队", "desc": "我能组合什么？专家团协作"}
+          ]
+        },
+        {
+          "type": "cards",
+          "eyebrow": "适合谁",
+          "title": "4 类适合报名的人",
+          "cards": [
+            {"tag": "EFFICIENCY", "title": "效率型用户", "desc": "每天重复性工作 > 2 小时。想用 AI 提效，告别加班。"},
+            {"tag": "CONTENT", "title": "内容型用户", "desc": "内容创作者 / 培训师 / HR / 管理者。需要持续产出。"},
+            {"tag": "SYSTEM", "title": "系统型用户", "desc": "想搭建个人 AI 工作系统的人。信息过载，资料杂乱。"},
+            {"tag": "MONETIZE", "title": "变现型用户", "desc": "OPC / 一人公司 / 想用 AI 实现副业变现的人。"}
+          ],
+          "columns": 4
+        },
+        {
+          "type": "contrast",
+          "eyebrow": "课程差异",
+          "title": "这门课不一样",
+          "rows": [
+            {"from": "工具按钮教学", "to": "工作流搭建方法论"},
+            {"from": "概念分享 + PPT", "to": "现场跑通真实任务"},
+            {"from": "碎片化技巧", "to": "体系化方法论"}
+          ]
+        },
+        {
+          "type": "cards",
+          "eyebrow": "学习承诺",
+          "title": "4 项学习承诺",
+          "cards": [
+            {"num": "01", "label": "学完带走", "title": "4 个可复用 AI 资产", "desc": "分身 + 工作流 + 知识库 + Skill 方法论", "color": "var(--p)"},
+            {"num": "02", "label": "押金退还", "title": "5 天打卡全额退 100 元", "desc": "自律押金机制 · 完成作业即可退回", "color": "var(--indigo)"},
+            {"num": "03", "label": "社群答疑", "title": "30 天专属答疑群", "desc": "课程结束后 30 天，群里随时提问", "color": "var(--pink)"},
+            {"num": "04", "label": "永久回看", "title": "所有直播课永久回看", "desc": "错过直播没关系，回放随时调用", "color": "var(--green)"}
+          ],
+          "columns": 2
+        },
+        {
+          "type": "price",
+          "eyebrow": "价格机制",
+          "title": "每天不到 60 元",
+          "steps": [
+            {"label": "原价", "value": "699", "note": "5 天直播 + 打卡 + 答疑 + 课件", "style": "original"},
+            {"label": "社群优惠价", "value": "399", "note": "社群成员 / 转发 / 老学员推荐", "style": "normal"},
+            {"label": "- 押金可退", "value": "100", "note": "完成 5 天打卡全额退还", "style": "normal"},
+            {"label": "实付", "value": "299", "note": "每天不到 60 元", "style": "final"}
+          ],
+          "notice": "100 元押金：报名时交付，完成 5 天打卡后全额退回"
+        },
+        {
+          "type": "steps",
+          "eyebrow": "报名流程",
+          "title": "4 步完成报名",
+          "steps": [
+            {"title": "扫码加好友", "desc": "扫描海报下方二维码添加顾问"},
+            {"title": "选择套餐", "desc": "支付 399 元 + 押金 100 元"},
+            {"title": "进入学习群", "desc": "付款后进入专属 5 天学习群"},
+            {"title": "开课", "desc": "每天 20:00-21:30 直播上课"}
+          ]
+        },
+        {
+          "type": "cta",
+          "eyebrow": "FINAL CALL",
+          "title": "名额有限\n先到先得",
+          "subtitle": "立即锁定社群优惠价 399 元\n5 天从会用 AI 到拥有 AI 工作系统",
+          "slogan": "不是学工具，而是直接做出你的 AI 工作流"
+        }
+      ]
+    },
+    {
+      "title": "Day 1 · AI 超级分身",
+      "nav_label": "Day 1",
+      "cover": {
+        "badge": "DAY 1",
+        "title": "AI 超级分身",
+        "subtitle": "让 WorkBuddy 成为你的「另一个自己」",
+        "meta": ["20:00 - 21:30", "3 个实操任务", "今日有打卡"]
+      },
+      "pages": [
+        {
+          "type": "cards",
+          "eyebrow": "今天的目标",
+          "title": "下课前，你会拥有什么",
+          "subtitle": "完成三层身份配置，并通过破冰三问验证 AI 真的懂你",
+          "cards": [
+            {"title": "3 个配置文件", "desc": "SOUL / IDENTITY / USER，把你重复交代的内容前置固化"},
+            {"title": "1 次成功破冰", "desc": "用 3 个问题验证 AI 是否真的理解了你"},
+            {"title": "1 个真实产出", "desc": "用分身完成一项你今天的真实工作"}
+          ],
+          "columns": 3
+        },
+        {
+          "type": "split",
+          "eyebrow": "先想清楚",
+          "title": "为什么第一课是「身份」？",
+          "left": {
+            "head": "多数人的做法",
+            "tone": "wrong",
+            "items": [
+              "上来就让 AI 写文案、画 PPT → 不了解你的风格，产出不像你",
+              "不配置身份直接用 → AI 像个陌生人，每次都要重新交代背景",
+              "把 AI 当工具而非伙伴 → 用完即走，能力无法积累"
+            ]
+          },
+          "right": {
+            "head": "正确的理解",
+            "tone": "right",
+            "items": [
+              "AI 不是工具，是伙伴——伙伴需要「了解你」",
+              "分身的本质：把你重复交代的内容，前置到配置里",
+              "改一次配置文件，胜过说一百遍指令"
+            ],
+            "formula": "AI 分身 = 系统提示词 + 结构化上下文 + 记忆系统"
+          }
+        },
+        {
+          "type": "columns3",
+          "eyebrow": "核心知识",
+          "title": "WorkBuddy 的三层身份架构",
+          "columns_data": [
+            {"tag": "LAYER 1", "file": "SOUL.md", "cn": "灵魂层 · 它是谁", "def": "定义 AI 的性格、语气、价值观。它说话的方式、坚持的底线、讨厌的东西。", "q": "你希望 AI 用什么态度跟你说话？"},
+            {"tag": "LAYER 2", "file": "IDENTITY.md", "cn": "身份层 · 它叫什么", "def": "定义 AI 的名字、定位、能力边界。它的身份名片。", "q": "你希望它扮演什么角色？"},
+            {"tag": "LAYER 3", "file": "USER.md", "cn": "用户层 · 你在哪", "def": "定义你的偏好、背景、需求。它服务对象的画像。", "q": "你希望 AI 怎么对待你？"}
+          ]
+        },
+        {
+          "type": "qa",
+          "eyebrow": "答疑",
+          "title": "4 个高频疑问",
+          "qa": [
+            {"q": "配置文件会不会太死板？", "a": "不会。配置是「基线」，对话中可以随时偏离。区别在于：偏离之前，AI 已经先理解了你的默认偏好。"},
+            {"q": "需要每次都重写配置吗？", "a": "不需要。配置一次长期使用。改一次配置文件，胜过说一百遍指令。只在需求变化时迭代。"},
+            {"q": "分身和 ChatGPT 有什么区别？", "a": "ChatGPT 每次对话都是陌生人，需要重复交代；分身是已经认识你的伙伴，开箱即用。"},
+            {"q": "要让 AI 知道我所有隐私吗？", "a": "不要。配置文件只写工作身份，不写个人隐私。密码、身份证、家庭住址一律不进配置。"}
+          ]
+        },
+        {
+          "type": "checkin",
+          "eyebrow": "今日打卡",
+          "title": "下课前把它交了",
+          "must": ["上传 SOUL.md 文件内容或截图", "上传 IDENTITY.md 文件内容或截图", "上传 USER.md 文件内容或截图"],
+          "bonus": ["破冰三问的对话截图（3 问）", "一个分身完成的工作截图", "一句话心得：哪条配置最有用"],
+          "next": {"title": "明天预告：Day 2 · Skill 系统全链路应用", "time": "第 2 天 20:00 - 21:30 · 学会让 AI 一键干活"}
+        }
+      ]
+    }
+  ]
+}
