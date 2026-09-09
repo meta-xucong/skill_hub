@@ -158,6 +158,40 @@ def safe_color(value, default='var(--p)'):
         return value
     return default
 
+def detail_body_html(text):
+    """detail.body 的 markdown-lite 渲染：段落、- 列表、**粗体**、`行内代码`、空行分段。"""
+    blocks, bullets = [], []
+
+    def flush_bullets():
+        if bullets:
+            blocks.append('<ul>' + ''.join(f'<li>{inline_md(b)}</li>' for b in bullets) + '</ul>')
+            bullets.clear()
+
+    for raw in str(text).replace('\r\n', '\n').replace('\r', '\n').split('\n'):
+        line = raw.strip()
+        if not line:
+            flush_bullets()
+            continue
+        m = re.match(r'^[-•]\s+(.+)$', line)
+        if m:
+            bullets.append(m.group(1))
+        else:
+            flush_bullets()
+            blocks.append(f'<p>{inline_md(line)}</p>')
+    flush_bullets()
+    return ''.join(blocks) or '<p></p>'
+
+def item_cls(item, base):
+    """卡片类条目的 class：带 detail 时追加 detailable。"""
+    return f'{base} detailable' if item.get('_detail_id') else base
+
+def detail_attrs(item):
+    """带 detail 的条目输出 data-detail / tabindex / role 属性。"""
+    did = item.get('_detail_id')
+    if not did:
+        return ''
+    return f'data-detail="{did}" tabindex="0" role="button"'
+
 def svg_icon(path_d, color, size=26):
     return (f'<svg viewBox="0 0 24 24" fill="none" stroke="{color}" '
             f'stroke-width="1.7" style="width:{size}px;height:{size}px">'
@@ -503,7 +537,7 @@ def r_cards(page, ch_idx):
         if c.get('label'):
             head += f'<div class="plabel">{esc(c["label"])}</div>'
         cards += f'''
-        <div class="glass-card pcard">
+        <div class="{item_cls(c, 'glass-card pcard')}" {detail_attrs(c)}>
           {head}
           <div class="ptitle">{inline_md(c.get('title', ''))}</div>
           <div class="pdesc">{inline_md(c.get('desc', ''))}</div>
@@ -520,7 +554,7 @@ def r_rows(page, ch_idx):
     rows = ''
     for r in page.get('rows', []):
         rows += f'''
-        <div class="glass-card day-row">
+        <div class="{item_cls(r, 'glass-card day-row')}" {detail_attrs(r)}>
           <span class="day-pill">{esc(r.get('pill', ''))}</span>
           <span class="date">{esc(r.get('date', ''))}</span>
           <span class="theme">{esc(r.get('theme', ''))}</span>
@@ -540,7 +574,7 @@ def r_flow(page, ch_idx):
     for i, n in enumerate(items):
         arrow = '<div class="logic-arrow">→</div>' if i > 0 else ''
         nodes += f'''{arrow}
-        <div class="glass-card logic-card">
+        <div class="{item_cls(n, 'glass-card logic-card')}" {detail_attrs(n)}>
           <div class="icon-ring">{esc(n.get('label', str(i+1)))}</div>
           <div class="keyword">{esc(n.get('keyword', ''))}</div>
           <div class="desc">{inline_md(n.get('desc', ''))}</div>
@@ -576,7 +610,7 @@ def r_price(page, ch_idx):
         arrow = '<div class="price-arrow">→</div>' if i < len(items) - 1 else '<div class="price-arrow">=</div>'
         op = '<div class="price-arrow">-</div>' if s.get('style') == 'minus' else arrow
         cards += f'''{op}
-        <div class="glass-card price-card {s.get('style', '')}">
+        <div class="{item_cls(s, 'glass-card price-card')} {s.get('style', '')}" {detail_attrs(s)}>
           <div class="plabel">{esc(s.get('label', ''))}</div>
           <div class="pvalue"><span class="cur">¥</span>{esc(s.get('value', ''))}</div>
           <div class="pnote">{inline_md(s.get('note', ''))}</div>
@@ -597,7 +631,7 @@ def r_steps(page, ch_idx):
     steps = ''
     for i, s in enumerate(page.get('steps', [])):
         steps += f'''
-        <div class="glass-card step-card">
+        <div class="{item_cls(s, 'glass-card step-card')}" {detail_attrs(s)}>
           <div class="step-num">{i+1}</div>
           <div class="step-title">{esc(s.get('title', ''))}</div>
           <div class="step-desc">{inline_md(s.get('desc', ''))}</div>
@@ -648,7 +682,7 @@ def r_columns3(page, ch_idx):
     cols = ''
     for c in page.get('columns_data', []):
         cols += f'''
-        <div class="glass-card layer-card">
+        <div class="{item_cls(c, 'glass-card layer-card')}" {detail_attrs(c)}>
           <span class="layer-tag">{esc(c.get('tag', ''))}</span>
           <div class="layer-file">{esc(c.get('file', ''))}</div>
           <div class="layer-cn">{esc(c.get('cn', ''))}</div>
@@ -666,7 +700,7 @@ def r_qa(page, ch_idx):
     cards = ''
     for qa in page.get('qa', [])[:6]:
         cards += f'''
-        <div class="glass-card qa-item">
+        <div class="{item_cls(qa, 'glass-card qa-item')}" {detail_attrs(qa)}>
           <div class="qa-q"><span class="qmark">Q</span><span>{esc(qa.get('q', ''))}</span></div>
           <div class="qa-a">{inline_md(qa.get('a', ''))}</div>
         </div>'''
@@ -710,12 +744,47 @@ def r_checkin(page, ch_idx):
       {next_html}
     </div>'''
 
+def r_chips(page, ch_idx):
+    """胶囊词条页：每个胶囊点开弹出详情卡片（术语深读、扩展说明等）。"""
+    chips_html = ''
+    for c in page.get('chips', []):
+        sub = f'<span class="chip-sub">{esc(c["hint"])}</span>' if c.get('hint') else ''
+        chips_html += f'''
+        <div class="{item_cls(c, 'deep-chip glass-card')}" {detail_attrs(c)}>{esc(c.get('label', ''))}{sub}</div>'''
+    note = f'<p class="chips-note">{inline_md(page["note"])}</p>' if page.get('note') else ''
+    return f'''
+    <div class="content-wrap" style="display:flex; flex-direction:column; align-items:center;">
+      {p_eyebrow(page.get('eyebrow'))}
+      {p_title(page.get('title', ''))}
+      {p_subtitle(page.get('subtitle'))}
+      <div class="chips-wrap">{chips_html}</div>
+      {note}
+    </div>'''
+
 PLAN_RENDERERS = {
     'cover': r_cover, 'promise': r_promise, 'cards': r_cards, 'rows': r_rows,
     'flow': r_flow, 'contrast': r_contrast, 'price': r_price, 'steps': r_steps,
     'cta': r_cta, 'split': r_split, 'columns3': r_columns3,
-    'qa': r_qa, 'checkin': r_checkin,
+    'qa': r_qa, 'checkin': r_checkin, 'chips': r_chips,
 }
+
+def _walk_details(node, where, errors):
+    """递归校验任意层级的 detail 字段，收集错误信息。"""
+    if isinstance(node, dict):
+        detail = node.get('detail')
+        if detail is not None:
+            if not isinstance(detail, dict):
+                errors.append(f'{where}.detail 必须是 object')
+            elif not isinstance(detail.get('body'), str) or not detail.get('body', '').strip():
+                errors.append(f'{where}.detail.body 必须是非空字符串')
+        for key, value in node.items():
+            if key == 'detail':
+                continue
+            _walk_details(value, f'{where}.{key}', errors)
+    elif isinstance(node, list):
+        for idx, value in enumerate(node):
+            _walk_details(value, f'{where}[{idx}]', errors)
+
 
 def validate_plan(plan):
     if not isinstance(plan, dict):
@@ -741,6 +810,34 @@ def validate_plan(plan):
         for j, page in enumerate(pages):
             if not isinstance(page, dict) or page.get('type') not in PLAN_RENDERERS:
                 raise ValueError(f'Plan chapters[{i}].pages[{j}].type 必须属于: {", ".join(PLAN_RENDERERS)}')
+            errors = []
+            _walk_details(page, f'Plan chapters[{i}].pages[{j}]', errors)
+            if page.get('type') == 'chips':
+                chips = page.get('chips')
+                if not isinstance(chips, list) or not chips:
+                    raise ValueError(f'Plan chapters[{i}].pages[{j}].chips 必须是非空数组')
+                for k, chip in enumerate(chips):
+                    if not isinstance(chip, dict) or not str(chip.get('label', '')).strip():
+                        raise ValueError(f'Plan chapters[{i}].pages[{j}].chips[{k}].label 必须是非空字符串')
+                    if not isinstance(chip.get('detail'), dict):
+                        raise ValueError(f'Plan chapters[{i}].pages[{j}].chips[{k}].detail 必须是 object（chips 页每个胶囊都应有详情）')
+            if errors:
+                raise ValueError('; '.join(errors))
+
+
+def collect_details(node, out):
+    """递归扫描页面树：凡带 detail 的条目分配 _detail_id 并收集详情。"""
+    if isinstance(node, dict):
+        if isinstance(node.get('detail'), dict):
+            did = f'd{len(out)}'
+            node['_detail_id'] = did
+            out[did] = node['detail']
+        for value in node.values():
+            if value is not node.get('detail'):
+                collect_details(value, out)
+    elif isinstance(node, list):
+        for value in node:
+            collect_details(value, out)
 
 
 def render_plan(plan):
@@ -753,6 +850,7 @@ def render_plan(plan):
     all_slides = []
     chapter_starts = []
     theme_css = ''
+    details = {}
 
     for ch_idx, ch in enumerate(plan.get('chapters', [])):
         color = theme_colors[ch_idx % len(theme_colors)]
@@ -772,6 +870,7 @@ def render_plan(plan):
         for i, page in enumerate(ch.get('pages', [])):
             ptype = page.get('type', 'cards')
             renderer = PLAN_RENDERERS.get(ptype, r_cards)
+            collect_details(page, details)
             inner = renderer(page, ch_idx)
             all_slides.append(f'''
   <section class="slide slide-{ptype}" data-chapter="{ch_idx}">
@@ -780,7 +879,16 @@ def render_plan(plan):
     {inner}
   </section>''')
 
-    return merge(all_slides, chapter_starts, brand, title, theme_colors)
+    detail_data = {
+        did: {
+            'title': str(d.get('title', '') or ''),
+            'badge': str(d.get('badge', '') or ''),
+            'source': str(d.get('source', '') or ''),
+            'html': detail_body_html(d.get('body', '')),
+        }
+        for did, d in details.items()
+    }
+    return merge(all_slides, chapter_starts, brand, title, theme_colors, detail_data)
 
 # ============================================================
 # 第四步：CSS 基础（全局样式，从手工版提炼）
@@ -1063,6 +1171,54 @@ body {
 .layer-q { font-size:13.5px; color:var(--ink-3); display:flex; gap:8px; }
 .layer-q .q { color:var(--p); font-weight:700; }
 
+/* ===== 弹出式详情卡片（detailable / modal / chips） ===== */
+.detailable { cursor:pointer; position:relative; transition:transform .25s, box-shadow .25s, border-color .25s; }
+.detailable:hover, .detailable:focus-visible { border-color:rgba(var(--p-rgb),0.4); box-shadow:var(--shadow-2); transform:translateY(-2px); }
+.detailable:focus-visible { outline:2px solid var(--p); outline-offset:2px; }
+.detailable::after {
+  content:'ⓘ 详情'; position:absolute; top:12px; right:14px;
+  font-size:11px; font-weight:600; letter-spacing:0.04em; color:var(--p);
+  background:rgba(var(--p-rgb),0.09); padding:3px 10px; border-radius:100px;
+}
+.chips-wrap { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:46px; max-width:1020px; }
+.deep-chip {
+  padding:13px 22px; border-radius:100px; font-size:15px; font-weight:600; color:var(--ink-2);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.deep-chip .chip-sub { font-size:12px; font-weight:500; color:var(--ink-4); }
+.deep-chip.detailable::after { content:'⌄'; position:static; background:none; padding:0; color:var(--p); font-size:14px; }
+.chips-note { margin-top:26px; font-size:14px; color:var(--ink-3); text-align:center; }
+.modal-overlay {
+  position:fixed; inset:0; z-index:300; display:flex; align-items:center; justify-content:center;
+  padding:28px; background:rgba(20,22,28,0.38);
+  backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
+}
+.modal-overlay[hidden] { display:none; }
+.modal-card {
+  position:relative; width:min(680px, 100%); max-height:78vh; overflow-y:auto;
+  background:rgba(255,255,255,0.9);
+  backdrop-filter:blur(30px) saturate(180%); -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.7); border-radius:26px; box-shadow:var(--shadow-2);
+  padding:34px 38px 30px;
+}
+.modal-close {
+  position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:50%;
+  border:none; background:rgba(0,0,0,0.05); color:var(--ink-2); font-size:15px; cursor:pointer;
+}
+.modal-close:hover { background:rgba(0,0,0,0.1); }
+.modal-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; padding-right:44px; }
+.modal-badge {
+  padding:4px 12px; border-radius:100px; font-size:11px; font-weight:700; letter-spacing:0.06em;
+  background:rgba(var(--p-rgb),0.1); color:var(--p); flex:none;
+}
+.modal-title { font-size:24px; font-weight:700; letter-spacing:-0.01em; line-height:1.3; }
+.modal-body { font-size:15.5px; line-height:1.75; color:var(--ink-2); }
+.modal-body p { margin-bottom:12px; }
+.modal-body ul { margin:0 0 12px 20px; }
+.modal-body li { margin-bottom:6px; }
+.modal-body code { background:rgba(0,0,0,0.05); border-radius:5px; padding:2px 6px; font-family:var(--mono); font-size:13px; }
+.modal-source { margin-top:16px; padding-top:14px; border-top:1px solid rgba(0,0,0,0.06); font-size:12.5px; color:var(--ink-4); }
+
 /* ===== 移动端适配 ===== */
 @media (max-width: 768px) {
   .slide { padding:76px 20px 90px; justify-content:flex-start; overflow-y:auto; -webkit-overflow-scrolling:touch; }
@@ -1105,6 +1261,13 @@ body {
   .num-badge, .tnum { font-size:38px !important; }
   .cmp-table { font-size:13px !important; }
   .scroll-hint { display:none; }
+  .detailable::after { top:8px; right:10px; font-size:10px; }
+  .chips-wrap { gap:10px; margin-top:32px; }
+  .deep-chip { padding:11px 18px; font-size:14px; }
+  .modal-overlay { padding:0; align-items:flex-end; }
+  .modal-card { border-radius:22px 22px 0 0; max-height:82vh; padding:26px 22px 30px; width:100%; }
+  .modal-title { font-size:20px; }
+  .modal-body { font-size:14.5px; }
 }
 """
 
@@ -1161,7 +1324,8 @@ def gen_chapter_slides(chapter, ch_idx, brand, theme_color, doc_title):
 # 第六步：合并
 # ============================================================
 
-def merge(all_slides_html, chapter_starts, brand, title, theme_colors):
+def merge(all_slides_html, chapter_starts, brand, title, theme_colors, detail_data=None):
+    detail_data = detail_data or {}
     dots = ''
     nav_labels = ['总览'] + [f'Day {i}' for i in range(1, len(chapter_starts))]
     nav_html = ''.join(
@@ -1189,6 +1353,17 @@ def merge(all_slides_html, chapter_starts, brand, title, theme_colors):
 {''.join(all_slides_html)}
 </div>
 <div class="progress" id="progress">{dots}</div>
+<div class="modal-overlay" id="detailModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="详情">
+    <button class="modal-close" type="button" aria-label="关闭详情">✕</button>
+    <div class="modal-head">
+      <span class="modal-badge" hidden></span>
+      <h3 class="modal-title"></h3>
+    </div>
+    <div class="modal-body"></div>
+    <div class="modal-source" hidden></div>
+  </div>
+</div>
 <script>
 const slides = document.querySelectorAll('.slide');
 const progress = document.getElementById('progress');
@@ -1204,6 +1379,31 @@ slides.forEach((_, i) => {{
 }});
 const dots = progress.querySelectorAll('.dot');
 let current = 0;
+if (slides[current]) slides[current].classList.add('active');
+const DETAIL_DATA = {json.dumps(detail_data, ensure_ascii=False).replace('</', '<\\/')};
+const detailModal = document.getElementById('detailModal');
+let detailModalOpen = false;
+function openDetail(id) {{
+  const d = DETAIL_DATA[id];
+  if (!d) return;
+  detailModal.querySelector('.modal-title').textContent = d.title || '';
+  const badge = detailModal.querySelector('.modal-badge');
+  if (d.badge) {{ badge.textContent = d.badge; badge.hidden = false; }} else {{ badge.hidden = true; }}
+  const src = detailModal.querySelector('.modal-source');
+  if (d.source) {{ src.textContent = '来源：' + d.source; src.hidden = false; }} else {{ src.hidden = true; }}
+  detailModal.querySelector('.modal-body').innerHTML = d.html;
+  detailModal.hidden = false;
+  detailModalOpen = true;
+  detailModal.querySelector('.modal-card').scrollTop = 0;
+}}
+function closeDetailModal() {{
+  if (!detailModalOpen) return;
+  detailModal.hidden = true;
+  detailModalOpen = false;
+}}
+detailModal.addEventListener('click', e => {{
+  if (e.target === detailModal || e.target.closest('.modal-close')) closeDetailModal();
+}});
 function go(n) {{
   if (n < 0 || n >= slides.length) return;
   slides[current].classList.remove('active');
@@ -1225,6 +1425,7 @@ function updateChapterNav() {{
 }}
 cps.forEach(cp => cp.addEventListener('click', () => go(parseInt(cp.dataset.goto))));
 document.addEventListener('keydown', e => {{
+  if (detailModalOpen) {{ if (e.key === 'Escape') closeDetailModal(); return; }}
   if (['ArrowRight','PageDown',' '].includes(e.key)) {{ e.preventDefault(); go(current+1); }}
   if (['ArrowLeft','PageUp'].includes(e.key)) go(current-1);
   if (e.key === 'Home') go(0);
@@ -1232,13 +1433,16 @@ document.addEventListener('keydown', e => {{
 }});
 document.addEventListener('click', e => {{
   if (e.target.closest('.progress') || e.target.closest('.chapter-nav')) return;
+  if (e.target.closest('.modal-overlay')) return;
+  const card = e.target.closest('.detailable');
+  if (card && card.dataset.detail) {{ openDetail(card.dataset.detail); return; }}
   if (e.clientX > window.innerWidth * 0.6) go(current+1);
   else if (e.clientX < window.innerWidth * 0.4) go(current-1);
 }});
 (function() {{
   let sx = 0, sy = 0, st = 0;
   document.addEventListener('touchstart', e => {{
-    if (e.target.closest('.progress') || e.target.closest('.chapter-nav')) return;
+    if (e.target.closest('.progress') || e.target.closest('.chapter-nav') || e.target.closest('.modal-overlay')) {{ sx = 0; return; }}
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = Date.now();
   }}, {{passive:true}});
   document.addEventListener('touchend', e => {{
@@ -1248,6 +1452,18 @@ document.addEventListener('click', e => {{
     const dt = Date.now() - st;
     sx = 0;
     if (dt > 600 || Math.abs(dx) < 50 || Math.abs(dy) > 80) return;
+    if (detailModalOpen) {{ closeDetailModal(); return; }}
+    let el = e.target, scroller = null;
+    while (el && el !== document.body) {{
+      const stl = window.getComputedStyle(el);
+      if ((stl.overflowX === 'auto' || stl.overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {{ scroller = el; break; }}
+      el = el.parentElement;
+    }}
+    if (scroller) {{
+      const atStart = scroller.scrollLeft <= 0;
+      const atEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
+      if ((dx < 0 && !atEnd) || (dx > 0 && !atStart)) return;
+    }}
     if (dx < 0) go(current + 1); else go(current - 1);
   }}, {{passive:true}});
 }})();

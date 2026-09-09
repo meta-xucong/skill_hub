@@ -38,7 +38,7 @@ git push
 
 | Skill | 说明 | 文档 |
 |---|---|---|
-| `h5-courseware` | 将 Markdown / 大纲编排为苹果磨砂玻璃风格单文件 H5 课件（支持键盘/点击/触摸翻页、移动端滚动） | [h5-courseware/README.md](h5-courseware/README.md) |
+| `h5-courseware` | 将 Markdown / 大纲编排为苹果磨砂玻璃风格单文件 H5 课件（支持键盘/点击/触摸翻页、移动端滚动、弹出式详情卡片） | [h5-courseware/README.md](h5-courseware/README.md) |
 
 ## 约定
 

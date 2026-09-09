@@ -7,7 +7,7 @@ description: >-
   适用于需要桌面键盘翻页、鼠标点击、移动端纵向滚动和左右滑动翻页的课件生成任务。
   AI 负责通读文档并自主生成 plan.json 页面规划；Python 脚本负责校验、确定性渲染和输出 HTML。
   触发词：做成 H5 课件、生成课件、可翻页演示、培训课件、幻灯 HTML、课程 H5、markdown 转课件、h5-courseware。
-version: 1.1.0
+version: 1.2.0
 author: Alchemy
 agent_created: true
 ---
@@ -82,7 +82,61 @@ python generate.py input.md --brand Alchemy --out 输出目录
 
 脚本会拒绝：空章节、缺少封面标题、未知页面类型、空主题色数组和非 `#RRGGBB` 颜色。非法输入以非零退出码结束，不静默回退。
 
-已支持页面类型：`cover`、`promise`、`cards`、`rows`、`flow`、`contrast`、`price`、`steps`、`cta`、`split`、`columns3`、`qa`、`checkin`。
+已支持页面类型：`cover`、`promise`、`cards`、`rows`、`flow`、`contrast`、`price`、`steps`、`cta`、`split`、`columns3`、`qa`、`checkin`、`chips`。
+
+## 弹出式详情卡片（detail）
+
+**核心规则：有必要展示、但文字太多且过于细节、不便在主页面呈现的内容，一律做成可点击的弹出式详情卡片。** 主页面保持一屏一论点，细节下沉到弹卡。
+
+适用内容包括但不限于：案例完整背景与数据口径、操作步骤全文、术语深读、Skill 用法详解、协议/许可证说明、对比分析、FAQ 长答案。
+
+### 用法一：卡片条目挂 `detail` 字段
+
+`cards`、`rows`、`flow.nodes`、`price.steps`、`steps`、`columns3.columns_data`、`qa` 的任意条目都可加 `detail`；渲染后该卡片带 `ⓘ 详情` 徽标，点击弹出磨砂玻璃 modal：
+
+```json
+{"title": "磁力金牛投放", "desc": "单商家冷启动案例", "detail": {
+  "title": "磁力金牛 · 案例详情",
+  "badge": "已核实",
+  "source": "快手磁力引擎官方案例库",
+  "body": "正文支持段落、- 列表、**粗体**、`行内代码`，空行分段。\n\n- 数据口径：单一商家，非平台平均\n- 结论：AIGC 素材 CTR 提升约 23%"
+}}
+```
+
+`detail` 字段结构：
+
+| 字段 | 必填 | 说明 |
+|---|---|---|
+| `body` | 是 | 弹卡正文，markdown-lite：段落 / `- 列表` / `**粗体**` / `` `行内代码` `` / 空行分段 |
+| `title` | 否 | 弹卡标题，缺省时可读性下降，建议始终填写 |
+| `badge` | 否 | 徽标，如 `已核实`、`教学示意`、`方法论`、`注意协议` |
+| `source` | 否 | 来源/归因标注，有数据的地方强烈建议写 |
+
+### 用法二：`chips` 胶囊词条页
+
+适合「术语表 / Skill 清单 / 深读入口」这类一页多个词条的场景，每个胶囊点开弹卡：
+
+```json
+{"type": "chips", "title": "术语深读", "subtitle": "点击胶囊查看详解",
+ "chips": [{"label": "Skill", "hint": "技能包", "detail": {"title": "Skill · 是什么", "body": "..."}}],
+ "note": "页面底部备注（可选）"}
+```
+
+`chips` 页每个条目都必须带 `detail`（校验强制）。
+
+### 设计原则（AI 编排时遵守）
+
+1. **判断标准**：内容删掉主页面会缺论据，放上去又撑爆版面 → 做成弹卡；只放一句话概述在卡片 `desc`，完整内容进 `detail.body`。
+2. **数据必须归因**：案例数据弹卡务必写 `source` 与 `badge`，无法核实的标注 `教学示意`，不得伪装成已核实。
+3. **弹卡正文密度**：每张弹卡 100–400 字为宜，超长考虑拆两张卡。
+4. **不要滥用**：一页弹卡数量 ≤ 卡片总数的一半；主页面自身能讲清楚的，不加弹卡。
+
+### 交互实现（脚本内置，无需配置）
+
+- modal 层 `z-index:300`，高于章节导航与进度点；ESC / 遮罩 / ✕ 三种关闭方式。
+- 移动端 modal 为底部抽屉样式，touch 手势在 modal 打开时优先关闭弹卡而非翻页。
+- 带滚动的容器（表格/代码）内横滑放行原生滚动，滑到尽头才翻页。
+- 首屏 slide 初始化即激活，冷启动不空白。
 
 ## 安全与内容处理
 
@@ -109,9 +163,11 @@ python generate.py input.md --brand Alchemy --out 输出目录
 3. 示例 Plan 能生成 HTML，且每个 slide 恰好对应一个可点击进度点。
 4. 真实 Markdown 能生成 HTML。
 5. 非法 Plan、非法颜色和未知页面类型返回非零错误。
-6. 注入 HTML 不会原样进入输出。
+6. 注入 HTML 不会原样进入输出（含 detail.body 内的 `<script>` 等标签）。
 7. 主题样式位于 `<head>`，`</html>` 后无额外 HTML。
-8. 项目版和个人安装版 Skill 文件保持一致。
+8. 含 `detail` 的 Plan 生成后：`detailable` 卡片数与 `DETAIL_DATA` 键数一致；modal 打开时键盘/滑动不翻页；输出含 `slides[current].classList.add('active')`。
+9. 非法 detail（body 缺失/为空）与缺 detail 的 chips 条目返回非零错误。
+10. 项目版和个人安装版 Skill 文件保持一致。
 
 ## 依赖
 
