@@ -851,8 +851,10 @@ def render_plan(plan):
     chapter_starts = []
     theme_css = ''
     details = {}
+    nav_labels = []
 
     for ch_idx, ch in enumerate(plan.get('chapters', [])):
+        nav_labels.append(ch.get('nav_label') or ch.get('title') or f'第{ch_idx+1}章')
         color = theme_colors[ch_idx % len(theme_colors)]
         chapter_starts.append(len(all_slides))
         theme_css += (f'\n.slide[data-chapter="{ch_idx}"] {{ '
@@ -888,7 +890,7 @@ def render_plan(plan):
         }
         for did, d in details.items()
     }
-    return merge(all_slides, chapter_starts, brand, title, theme_colors, detail_data)
+    return merge(all_slides, chapter_starts, brand, title, theme_colors, detail_data, nav_labels)
 
 # ============================================================
 # 第四步：CSS 基础（全局样式，从手工版提炼）
@@ -919,8 +921,9 @@ body {
 }
 .slide {
   position:absolute; inset:0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:70px 90px;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  padding:104px 88px 96px;
+  overflow:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin;
   opacity:0; visibility:hidden; transform:translateY(8px) scale(0.99);
   transition:opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
 }
@@ -962,7 +965,7 @@ body {
   background:rgba(var(--p-rgb),0.08); color:var(--p);
   font-size:13px; font-weight:600; letter-spacing:0.06em; margin-bottom:22px;
 }
-.content-wrap { position:relative; z-index:2; width:100%; max-width:1220px; }
+.content-wrap { position:relative; z-index:2; width:100%; max-width:1220px; margin-top:auto; margin-bottom:auto; overflow-wrap:break-word; }
 .glass-card {
   background:var(--glass);
   backdrop-filter:blur(30px) saturate(180%); -webkit-backdrop-filter:blur(30px) saturate(180%);
@@ -1059,11 +1062,14 @@ body {
 .chapter-nav {
   position:fixed; top:26px; left:50%; transform:translateX(-50%);
   display:flex; gap:6px; padding:6px 8px; z-index:200;
+  max-width:calc(100vw - 72px); overflow-x:auto; white-space:nowrap;
+  scrollbar-width:none; -ms-overflow-style:none;
   background:rgba(255,255,255,0.75);
   backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);
   border:1px solid rgba(255,255,255,0.6); border-radius:100px;
   box-shadow:0 8px 32px rgba(0,0,0,0.08);
 }
+.chapter-nav::-webkit-scrollbar { display:none; }
 .chapter-nav .cp {
   padding:6px 14px; border-radius:100px; font-size:12px; font-weight:600;
   letter-spacing:0.06em; color:var(--ink-4); cursor:pointer; transition:all .3s;
@@ -1102,9 +1108,10 @@ body {
 .pcard .pnum-color { font-weight:700; }
 .rows-list { display:flex; flex-direction:column; gap:14px; margin-top:44px; max-width:1080px; margin-left:auto; margin-right:auto; }
 .day-row {
-  display:grid; grid-template-columns:110px 110px 1fr 1.2fr; align-items:center; gap:20px; padding:20px 28px;
+  display:grid; grid-template-columns:150px 110px 1fr 1.2fr; align-items:center; gap:20px; padding:20px 28px;
 }
-.day-row .day-pill { padding:6px 14px; border-radius:100px; font-size:14px; font-weight:600; background:rgba(var(--p-rgb),0.12); color:var(--p); justify-self:start; }
+.day-row > * { min-width:0; overflow-wrap:anywhere; }
+.day-row .day-pill { padding:6px 14px; border-radius:100px; font-size:14px; font-weight:600; background:rgba(var(--p-rgb),0.12); color:var(--p); justify-self:start; text-align:center; line-height:1.35; }
 .day-row .date { font-size:15px; color:var(--ink-3); font-weight:500; }
 .day-row .theme { font-size:20px; font-weight:600; }
 .day-row .output { font-size:15px; color:var(--ink-2); }
@@ -1227,6 +1234,10 @@ body {
   .goal-cards, .task-grid, .qa-grid, .check-wrap, .card-grid, .why-split, .layer-flow { grid-template-columns:1fr !important; gap:16px !important; }
   .card-grid[data-columns="2"], .card-grid[data-columns="4"] { grid-template-columns:1fr !important; }
   .diff-row { grid-template-columns:1fr !important; gap:10px; padding:18px 20px; }
+  .day-row { grid-template-columns:auto 1fr !important; gap:8px 14px; padding:16px 18px; align-items:start; }
+  .day-row > * { grid-column:1 / -1; }
+  .day-row .day-pill { grid-column:1; justify-self:start; }
+  .day-row .date { grid-column:2; justify-self:start; text-align:left; }
   .price-flow, .signup-flow { flex-direction:column !important; align-items:stretch !important; gap:14px !important; }
   .price-card, .step-card { width:100% !important; }
   .price-arrow, .signup-flow .logic-arrow { transform:rotate(90deg); align-self:center; }
@@ -1255,9 +1266,9 @@ body {
   .chapter-nav .cp { padding:5px 10px; font-size:11px; }
   .progress { bottom:14px; max-width:92vw; overflow:hidden; }
   .code-body { font-size:12.5px !important; padding:16px 18px !important; }
-  .pipe-flow { flex-direction:column !important; align-items:stretch !important; }
-  .pipe-node { min-width:0 !important; }
-  .pipe-arrow { transform:rotate(90deg); align-self:center; }
+  .pipe-flow, .logic-flow { flex-direction:column !important; align-items:stretch !important; }
+  .pipe-node, .logic-card { width:100% !important; min-width:0 !important; }
+  .pipe-arrow, .logic-arrow { transform:rotate(90deg); align-self:center; }
   .num-badge, .tnum { font-size:38px !important; }
   .cmp-table { font-size:13px !important; }
   .scroll-hint { display:none; }
@@ -1268,8 +1279,58 @@ body {
   .modal-card { border-radius:22px 22px 0 0; max-height:82vh; padding:26px 22px 30px; width:100%; }
   .modal-title { font-size:20px; }
   .modal-body { font-size:14.5px; }
+
+  /* --- promise 页：大字号 + 大内边距会把窄屏内容区压塌，必须收敛 --- */
+  .promise-card { padding:34px 22px; }
+  .promise-card .lead { font-size:19px; margin-bottom:8px; }
+  .promise-card .from { font-size:26px; margin-bottom:10px; }
+  .promise-card .arrow { font-size:20px; margin:8px 0; }
+  .promise-card .to { font-size:27px; }
+  /* --- price 页：60px 数字在窄屏过大 --- */
+  .price-card .pvalue { font-size:36px; }
+  .price-card .pvalue .cur { font-size:19px; }
+  /* --- logic 卡片关键词 --- */
+  .logic-card .keyword { font-size:22px; }
+  .logic-card .icon-ring { width:46px; height:46px; }
+  /* --- 卡片大编号 --- */
+  .pcard .pnum { font-size:34px; }
+  /* --- 提示条：手机上胶囊圆角 + 居中难读，改圆角矩形左对齐 --- */
+  .notice-bar { border-radius:16px; padding:14px 18px; text-align:left; align-items:flex-start; }
 }
 """
+
+
+def audit_mobile_coverage(min_font_px=28):
+    """自检：找出未在移动端媒体查询里收敛的大字号选择器（非阻断提醒）。
+
+    背景：移动端适配是「白名单」式的——每个组件都要单独写一条覆盖规则。
+    新增组件若漏写，在手机上会静默散架。已知两例：
+      - .logic-flow 漏写 → 6 张卡片横排，横向溢出 186px；
+      - .promise-card 漏写 → 50px 字号配 80px 内边距，一句被挤成 7 行、整页溢出 393px。
+    此函数在生成时扫一遍 BASE_CSS，把「字号 >= min_font_px 且未在 @media 中出现」
+    的选择器列出来，避免同类问题第三次发生。
+
+    返回 [(font_size, selector), ...]，按字号倒序。仅提醒，不阻断生成。
+    """
+    marker = '@media (max-width: 768px)'
+    i = BASE_CSS.find(marker)
+    if i < 0:
+        return []
+    head, media = BASE_CSS[:i], BASE_CSS[i:]
+    covered = set(re.findall(r'\.([A-Za-z][\w-]*)', media))
+    missed = set()
+    for sel, body in re.findall(r'([^{}\n][^{}]*?)\{([^{}]*)\}', head):
+        if 'media' in sel or ':root' in sel:
+            continue
+        sizes = [int(x) for x in re.findall(r'font-size\s*:\s*(\d+)px', body)]
+        if not sizes or max(sizes) < min_font_px:
+            continue
+        classes = re.findall(r'\.([A-Za-z][\w-]*)', sel)
+        if not classes or all(c in covered for c in classes):
+            continue
+        missed.add((max(sizes), sel.strip()))
+    return sorted(missed, reverse=True)
+
 
 # ============================================================
 # 第五步：生成章节 HTML
@@ -1324,12 +1385,13 @@ def gen_chapter_slides(chapter, ch_idx, brand, theme_color, doc_title):
 # 第六步：合并
 # ============================================================
 
-def merge(all_slides_html, chapter_starts, brand, title, theme_colors, detail_data=None):
+def merge(all_slides_html, chapter_starts, brand, title, theme_colors, detail_data=None, nav_labels=None):
     detail_data = detail_data or {}
     dots = ''
-    nav_labels = ['总览'] + [f'Day {i}' for i in range(1, len(chapter_starts))]
+    nav_labels = list(nav_labels) if nav_labels else ['总览'] + [f'Day {i}' for i in range(1, len(chapter_starts))]
+    nav_labels = [str(x) for x in nav_labels] + [''] * max(0, len(chapter_starts) - len(nav_labels))
     nav_html = ''.join(
-        f'<span class="cp{" active" if i == 0 else ""}" data-goto="{s}">{l}</span>'
+        f'<span class="cp{" active" if i == 0 else ""}" data-goto="{s}">{esc(l)}</span>'
         for i, (s, l) in enumerate(zip(chapter_starts, nav_labels))
     )
 
@@ -1380,6 +1442,28 @@ slides.forEach((_, i) => {{
 const dots = progress.querySelectorAll('.dot');
 let current = 0;
 if (slides[current]) slides[current].classList.add('active');
+function fitSlide(s) {{
+  const w = s.querySelector('.content-wrap');
+  if (!w) return;
+  w.style.transform = '';
+  w.style.marginTop = '';
+  w.style.marginBottom = '';
+  if (window.innerWidth <= 768) return;
+  const cs = window.getComputedStyle(s);
+  const avail = s.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+  const h = w.offsetHeight;
+  if (!avail || !h || h <= avail) return;
+  const k = Math.min(1, Math.max(avail / h, 0.62));
+  const cut = (h - h * k) / 2;
+  w.style.transformOrigin = 'center center';
+  w.style.transform = 'scale(' + k + ')';
+  w.style.marginTop = (-cut) + 'px';
+  w.style.marginBottom = (-cut) + 'px';
+}}
+function fitAllSlides() {{ slides.forEach(fitSlide); }}
+fitAllSlides();
+window.addEventListener('resize', fitAllSlides);
+if (document.fonts && document.fonts.ready) {{ document.fonts.ready.then(fitAllSlides); }}
 const DETAIL_DATA = {json.dumps(detail_data, ensure_ascii=False).replace('</', '<\\/')};
 const detailModal = document.getElementById('detailModal');
 let detailModalOpen = false;
@@ -1536,6 +1620,12 @@ def main():
     args = parser.parse_args()
     if bool(args.plan_path) == bool(args.md_path):
         parser.error('必须且只能指定 md_path 或 --plan')
+    _gaps = audit_mobile_coverage()
+    if _gaps:
+        print('[移动端自检] 以下大字号选择器未在 @media(768px) 收敛，手机上可能溢出/散架：',
+              file=sys.stderr)
+        for _fs, _sel in _gaps:
+            print(f'  - {_sel}  (font-size {_fs}px)', file=sys.stderr)
     try:
         theme = parse_theme(args.theme)
         if args.plan_path:
