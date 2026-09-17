@@ -68,7 +68,8 @@ agent_created: true
 1. `GET /v1/models`（新 key）→ 应精确列出 models_list_config 的模型
 2. 逐模型 `POST /v1/chat/completions`（max_tokens 小值）→ 记录 OK/FAIL + usage
 3. 公网复测 `https://aiself.vip/v1/models` + 一次 chat
-4. 常见 FAIL 语义：`credit insufficient balance`=上游 key 没钱；`Usage limit reached ... reset at 00:00`=上游免费池当日限额；`503 model_not_found`=上游分组无此模型
+4. 计费验证：`model-pricing?model=` 预览端点只显示内置目录，渠道(channel)定价**不体现在预览里但计费时生效**；以 usage_logs 实测为准：total_cost = in×input_price + out×output_price，actual_cost = total_cost × 分组 rate_multiplier
+5. 常见 FAIL 语义：`credit insufficient balance`=上游 key 没钱；`Usage limit reached ... reset at 00:00`=上游免费池当日限额；`503 model_not_found`=上游分组无此模型
 
 ## 5. 回滚
 
