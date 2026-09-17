@@ -39,6 +39,7 @@ git push
 | Skill | 说明 | 文档 |
 |---|---|---|
 | `h5-courseware` | 将 Markdown / 大纲编排为苹果磨砂玻璃风格单文件 H5 课件（支持键盘/点击/触摸翻页、移动端滚动、弹出式详情卡片） | [h5-courseware/README.md](h5-courseware/README.md) |
+| `sub2api-upstream-integration` | 把 OpenAI 兼容中转站 key 接入自建 Sub2API（SSH 通道、admin key mint、账号/分组/模型清单、全链路验收与定制构建坑位） | [sub2api-upstream-integration/README.md](sub2api-upstream-integration/README.md) |
 
 ## 约定
 
