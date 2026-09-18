@@ -79,5 +79,7 @@ agent_created: true
 
 ## 6. 相关联资产
 
+- **定价设计复盘**：同目录 `DESIGN.md`（成本模型推导、0.4 分销折扣实测、定价公式与踩坑清单）
+
 - 探测上游能力：先跑 `GET <上游>/v1/models`（图像站另查 `/v1/images/models`，见 yetoken/wokey 经验）
 - 用户 skill_hub 仓库约定：`meta-xucong/skill_hub`，新 skill 可按其结构提交
